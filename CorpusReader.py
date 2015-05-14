@@ -58,6 +58,7 @@ if __name__ == "__main__":
 
     tokenizer = RegexpTokenizer(r'\w+')
     for f in glob.glob(sys.argv[1] + "/*"):
+        print f
         outfile = gzip.open(f + ".norm.gz", "wb")
         cr = CorpusReader(f)
         for sent in cr.get_raw_corpus():
