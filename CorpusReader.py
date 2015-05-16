@@ -10,7 +10,7 @@ class CorpusReader():
     """
 
     def __init__(self, file_name, max_limit=None):
-        self.file = gzip.open(file_name, "r")
+        self.file = gzip.open(file_name, "rb")
         self.max_limit = max_limit
 
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     tokenizer = RegexpTokenizer(r'\w+')
     for f in glob.glob(sys.argv[1] + "/*"):
         print f
-        outfile = gzip.open(f + ".norm.gz", "wb")
+        outfile = open(f + ".norm", "w")
         cr = CorpusReader(f)
         for sent in cr.get_raw_corpus():
             outfile.write(" ".join(tokenizer.tokenize(sent.decode("utf-8"))).encode("utf-8") + "\n")
