@@ -7,9 +7,8 @@ def train_vector_representations(corpus_file, output_file, min_count=5, vector_d
     model = gensim.models.Word2Vec(cr, min_count=min_count, size=vector_dim, workers=workers)
     model.save(output_file)
 
-
-
-
+def loadModel(filename):
+    return gensim.models.Word2Vec.load(filename)
 
 
 
