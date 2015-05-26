@@ -38,15 +38,16 @@ if __name__ == '__main__':
     # Construct frequency dictionary
     fd = FreqDist(wordlist.words())
 
-    # Get translations from api En -> De
     translations = dict()
 
+    # Get most frequent words to train projection matrix
     mostFrequentWords = sorted(fd.items(), key=lambda x: x[1], reverse=True)[:nWords]
 
     # Load word2vec trained models
     gensimModelEn = loadModel(modelPathEn)
     gensimModelDe = loadModel(modelPathDe)
 
+    # Instantiate linear regression structures
     X = np.empty((0,enRepDimension))
     Y = np.empty((0,deRepDimension))
 
@@ -61,6 +62,7 @@ if __name__ == '__main__':
         for trans in translations[word]:
             wordRepDe = gensimModelDe[trans]
 
+        # Add samples to linear regression structures
         X = np.r_[X,wordRepEn[np.newaxis,:]]
         Y = np.r_[Y,wordRepDe[np.newaxis,:]]
 
