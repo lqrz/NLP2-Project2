@@ -6,6 +6,7 @@ import sys
 from dictionary import get_translations
 from word2vec import loadModel
 from sklearn.linear_model import Ridge
+import numpy as np
 
 if __name__ == '__main__':
 
@@ -18,6 +19,8 @@ if __name__ == '__main__':
     modelPath = '/'
     # path = '/home/lqrz/Desktop/fold/europarl.en.norm'  # path to .norm file (enlgish)
     path = 'data/en/norm/lqrz.en'  # path to .norm file (enlgish)
+    enRepDimension = 800 # English word2vec representation dimension
+    deRepDimension = 200 # Deutsch word2vec representation dimension
     # ------------- End params -------------#
 
     idx = path.rfind('/') + 1
@@ -38,6 +41,9 @@ if __name__ == '__main__':
     gensimModelEn = loadModel('models/mono_800_en.bin')
     gensimModelDe = loadModel('models/mono_200_de.bin')
 
+    X = np.zeros((1,enRepDimension))
+    Y = np.zeros((1,deRepDimension))
+
     for word, _ in mostFrequentWords:
 
         # Get translation from thesaurus api
@@ -49,11 +55,14 @@ if __name__ == '__main__':
         for trans in translations[word]:
             wordRepDe = gensimModelDe[trans]
 
+        np.r_[X,wordRepEn]
+        np.r_[Y,wordRepDe]
+
     # Instantiate linear regression solver
     solver = Ridge(alpha, solver='lsqr')
 
     # Fit data
-    solver.fit(X, y)
+    solver.fit(X, Y)
 
     # Store translation matrix
     solver.coef_
