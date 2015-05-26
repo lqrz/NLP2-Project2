@@ -13,14 +13,19 @@ if __name__ == '__main__':
     # ------------- Begin params -------------#
     nWords = 5  # Number of words to train translation matrix
     nTranslations = 1
+    
     alpha = 0.1  # linear regression solver regularization param
-    # path = sys.argv[1] # path to .norm file (enlgish)
-    # modelPath = sys.argv[2] # path to model file (word2vec)
-    modelPath = '/'
-    # path = '/home/lqrz/Desktop/fold/europarl.en.norm'  # path to .norm file (enlgish)
-    path = 'data/en/norm/lqrz.en'  # path to .norm file (enlgish)
+
+    # modelPathEn = sys.argv[2] # path to model file (word2vec)
+    # modelPathDe = sys.argv[3] # path to model file (word2vec)
+    modelPathEn = 'models/mono_800_en.bin'
+    modelPathDe = 'models/mono_200_de.bin'
     enRepDimension = 800 # English word2vec representation dimension
     deRepDimension = 200 # Deutsch word2vec representation dimension
+
+    # path = sys.argv[1] # path to .norm file (enlgish)
+    path = 'data/en/norm/lqrz.en'  # path to .norm file (enlgish)
+
     # ------------- End params -------------#
 
     idx = path.rfind('/') + 1
@@ -38,11 +43,11 @@ if __name__ == '__main__':
     mostFrequentWords = sorted(fd.items(), key=lambda x: x[1], reverse=True)[:nWords]
 
     # Load word2vec trained models
-    gensimModelEn = loadModel('models/mono_800_en.bin')
-    gensimModelDe = loadModel('models/mono_200_de.bin')
+    gensimModelEn = loadModel(modelPathEn)
+    gensimModelDe = loadModel(modelPathDe)
 
-    X = X = np.empty((0,enRepDimension))
-    Y = X = np.empty((0,deRepDimension))
+    X = np.empty((0,enRepDimension))
+    Y = np.empty((0,deRepDimension))
 
     for word, _ in mostFrequentWords:
 
@@ -56,7 +61,7 @@ if __name__ == '__main__':
             wordRepDe = gensimModelDe[trans]
 
         X = np.r_[X,wordRepEn[np.newaxis,:]]
-        Y = np.r_[Y,wordRepEn[np.newaxis,:]]
+        Y = np.r_[Y,wordRepDe[np.newaxis,:]]
 
     # Instantiate linear regression solver
     solver = Ridge(alpha, solver='lsqr')
