@@ -7,13 +7,14 @@ from dictionary import get_translations
 from word2vec import loadModel
 from sklearn.linear_model import Ridge
 import numpy as np
+import pickle
 
 if __name__ == '__main__':
 
     # ------------- Begin params -------------#
     nWords = 5  # Number of words to train translation matrix
     nTranslations = 1
-    
+
     alpha = 0.1  # linear regression solver regularization param
 
     # modelPathEn = sys.argv[2] # path to model file (word2vec)
@@ -70,4 +71,4 @@ if __name__ == '__main__':
     solver.fit(X, Y)
 
     # Store translation matrix
-    solver.coef_
+    pickle.dump(solver.coef_,open('lrweights.p','w'))
