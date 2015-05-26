@@ -41,8 +41,8 @@ if __name__ == '__main__':
     gensimModelEn = loadModel('models/mono_800_en.bin')
     gensimModelDe = loadModel('models/mono_200_de.bin')
 
-    X = np.zeros((1,enRepDimension))
-    Y = np.zeros((1,deRepDimension))
+    X = X = np.empty((0,enRepDimension))
+    Y = X = np.empty((0,deRepDimension))
 
     for word, _ in mostFrequentWords:
 
@@ -55,8 +55,8 @@ if __name__ == '__main__':
         for trans in translations[word]:
             wordRepDe = gensimModelDe[trans]
 
-        np.r_[X,wordRepEn]
-        np.r_[Y,wordRepDe]
+        X = np.r_[X,wordRepEn[np.newaxis,:]]
+        Y = np.r_[Y,wordRepEn[np.newaxis,:]]
 
     # Instantiate linear regression solver
     solver = Ridge(alpha, solver='lsqr')
