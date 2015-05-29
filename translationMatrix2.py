@@ -23,6 +23,16 @@ def get_k_nearest_translations(vector, model, k=1):
     return model.most_similar(positive=[vector], topn=k)
 
 def evaluate(test_samples, en_model, de_model, translation_matrix, k_nearest=1, n_translations=None):
+    """
+    Evaluates a translation matrix based on test samples.
+    :param test_samples: List of test samples [(word1, (trans1, trans2, ...), ...]
+    :param en_model: en gensim model (source)
+    :param de_model: de gensim model (target)
+    :param translation_matrix: translation matrix
+    :param k_nearest: number of translations (k-nearest to approximated target vector) to be considered
+    :param n_translations: max. number of gold translations to be considered
+    :return: list of averaged similarities and list of candidate translations for each test sample
+    """
     found_similarities = []
     candidate_translations = []
     for word, translations in test_samples:
@@ -36,10 +46,10 @@ def evaluate(test_samples, en_model, de_model, translation_matrix, k_nearest=1, 
             similarity_sum = 0
             for gold_trans in translations[:n_translations]:
                 for i, pred_trans in enumerate(predicted_translations):
-                    if gold_trans == predicted_translations:
+                    if gold_trans == pred_trans:
                         found_transl += 1
                         similarity_sum += similarities[i]
-                        break
+
             if found_transl:
                 found_similarities.append(float(similarity_sum) / found_transl)
             else:
@@ -66,8 +76,8 @@ def calculate_accuracy(similarities):
 if __name__ == '__main__':
 
     # ------------- Begin params -------------#
-    matrix_file = "test.p"
-    nWords = 5  # Number of words to train translation matrix. Set to None if fixed sample size
+    matrix_file = "models/800_200_tm.p"
+    nWords = 5000  # Number of words to train translation matrix. Set to None if fixed sample size
     # nSamples = None # Fixed sample size, set to None if it doesn't matter.
     nTranslations = 1 # (max) number of translation variants per word (default=1)
 
@@ -81,7 +91,7 @@ if __name__ == '__main__':
     # Evaluation
     n_test_samples = 100 # number of test samples (subsequent samples not used in training)
     n_test_translations = 1 # number of translation variants to be considered as gold standard
-    k_nearest = 3 # number of k nearest words of translated vector to be considered.
+    k_nearest = 5 # number of k nearest words of translated vector to be considered.
 
 
     # ------------- End params -------------#
