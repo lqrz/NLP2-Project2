@@ -72,36 +72,79 @@ def calculate_accuracy(similarities):
 
     return accuracy, average_sim
 
+def learn_translation_matrix(X, Y, alpha=0.1):
+    print "Learning translation matrix"
+    # Instantiate linear regression solver
+    solver = Ridge(alpha, solver='lsqr')
+
+    # Fit data
+    solver.fit(X, Y)
+
+    # translation_matrix
+    return solver.coef_
+
+
+
+
+def get_valid_samples(samples, n, model, n_translations=None):
+    valid = []
+    c = 0
+    for i, sample in enumerate(samples):
+        valid_trans = []
+        for trans in sample[1][:n_translations]:
+            try:
+                model[trans]
+                valid_trans.append(trans)
+            except KeyError:
+                pass
+
+        if valid_trans:
+            valid.append((sample[0], tuple(valid_trans)))
+            c += 1
+
+        if c == n:
+            break
+
+    return valid, samples[i+1:]
+
+def get_train_test_sets(dict_file, n_translations, n_train_samples, n_test_samples, de_model):
+    """
+    Splits data into training and test samples.
+    :param dict_file: File that contains translations
+    :param n_translations: Top n translations to be considered.
+    :param n_train_samples: Number of (valid) samples for training.
+    :param n_test_samples: Number of (valid) samples for testing.
+    :param de_model: de_model, required to see if translation is available as in vector space.
+    :return: training and test samples
+    """
+    samples = get_dict_samples(dict_file)
+    train_samples, rest = get_valid_samples(samples, n_train_samples, de_model, n_translations)
+    train_samples = [(k, t) for (k,v) in train_samples for t in v]
+    test_samples, _ = get_valid_samples(rest, n_test_samples, de_model)
+    return train_samples, test_samples
+
 
 if __name__ == '__main__':
 
     # ------------- Begin params -------------#
-    matrix_file = "models/800_200_tm.p"
-    nWords = 5000  # Number of words to train translation matrix. Set to None if fixed sample size
-    # nSamples = None # Fixed sample size, set to None if it doesn't matter.
-    nTranslations = 1 # (max) number of translation variants per word (default=1)
+    matrix_file = "models/lowercase/800_200_tm.p"
+    n_train_samples = 5000  # Number of words to train translation matrix.
+    n_translations = 1 # (max) number of translation variants per word (default=1)
 
-    dict_file = "models/truecase/top10ken_trans_yandex.txt"
+    dict_file = "models/lowercase/top10ken_trans_yandex.txt"
 
-    alpha = 0.1  # linear regression solver regularization param
+    alphas = [0.1, 0.2,  0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]  # linear regression solver regularization param
 
-    modelPathEn = 'models/truecase/mono_800_en.bin'
-    modelPathDe = 'models/truecase/mono_200_de.bin'
+    modelPathEn = 'models/lowercase/mono_800_en.bin'
+    modelPathDe = 'models/lowercase/mono_200_de.bin'
 
     # Evaluation
-    n_test_samples = 100 # number of test samples (subsequent samples not used in training)
+    n_test_samples = 100 # number of test samples (subsequent words not used in training)
     n_test_translations = 1 # number of translation variants to be considered as gold standard
     k_nearest = 5 # number of k nearest words of translated vector to be considered.
 
 
     # ------------- End params -------------#
-
-
-
-    samples = get_dict_samples(dict_file)
-
-    train_samples = samples[:nWords]
-    test_samples = samples[nWords:nWords+n_test_samples]
 
 
     # Load word2vec trained models
@@ -112,73 +155,59 @@ if __name__ == '__main__':
     en_layer_size = gensimModelEn.layer1_size
     de_layer_size = gensimModelDe.layer1_size
 
+
+    # Split training and test set
+    train_samples, test_samples = get_train_test_sets(dict_file, n_translations, n_train_samples, n_test_samples, gensimModelDe)
+
+
+
     # Instantiate linear regression structures
     # Create max. size matrices and fill them up
     # X = samples x layer_size_en
     # Y = samples x layer_size_de
-    X = np.zeros((nWords * nTranslations, en_layer_size))
-    Y = np.empty((nWords * nTranslations, de_layer_size))
+    X = np.zeros((len(train_samples), en_layer_size))
+    Y = np.empty((len(train_samples), de_layer_size))
 
 
-    sample_count = 0
-    word_count = 0
-    for word, translations in train_samples:
+    for i, (word, translation) in enumerate(train_samples):
         # Get representations for words
         wordRepEn = gensimModelEn[word]
-        transl_accepted = False
-        for trans in translations[:nTranslations]:
-            try:
-                wordRepDe = gensimModelDe[trans]
+        wordRepDe = gensimModelDe[translation]
+        X[i] = wordRepEn
+        Y[i] = wordRepDe
 
-                X[sample_count] = wordRepEn
-                Y[sample_count] = wordRepDe
-                sample_count += 1
-                transl_accepted = True
-            except KeyError:
-                print "Translation not found: ", trans
-        word_count += int(transl_accepted)
+    # parameter search
+    accuracies = []
+    average_sims = []
 
+    for j, alpha in enumerate(alphas):
+        print "Training with alpha=", alpha
+        translation_matrix = learn_translation_matrix(X, Y, alpha)
 
-    # Reduce matrices to actual sample size
-    X = X[:sample_count, :]
-    Y = Y[:sample_count, :]
+        print "Saving matrix"
+        # Store translation matrix
+        pickle.dump(translation_matrix,open(matrix_file,'w'))
 
-    print str(sample_count) + " samples from " + str(word_count) + " words."
+        print "Evaluating"
+        # evaluation
+        similarities, predicted_translations = evaluate(test_samples, gensimModelEn, gensimModelDe, translation_matrix, k_nearest=k_nearest, n_translations=n_test_translations)
+        accuracy, average_sim = calculate_accuracy(similarities)
 
+        for i, (s, t) in enumerate(test_samples):
+            print "Test word: ", s
+            print "Gold: ", t
+            print "Cand: ", predicted_translations[i]
+            print "Sim: ", similarities[i]
 
-    print "Learning translation matrix"
-    # Instantiate linear regression solver
-    solver = Ridge(alpha, solver='lsqr')
+        print "Accuracy: ", accuracy
+        print "Average similarity: ", average_sim
 
-    # Fit data
-    solver.fit(X, Y)
+        accuracies.append(accuracy)
+        average_sims.append(average_sim)
 
-    # translation_matrix
-    translation_matrix = solver.coef_
+    best_index = np.argmax(accuracies)
 
-    print "Saving matrix"
-    # Store translation matrix
-    pickle.dump(translation_matrix,open(matrix_file,'w'))
-
-    print "Evaluating"
-    # evaluation
-    similarities, predicted_translations = evaluate(test_samples, gensimModelEn, gensimModelDe, translation_matrix, k_nearest=k_nearest, n_translations=n_test_translations)
-    accuracy, average_sim = calculate_accuracy(similarities)
-
-    for i, (s, t) in enumerate(test_samples):
-        print "Test word: ", s
-        print "Gold: ", t
-        print "Cand: ", predicted_translations[i]
-        print "Sim: ", similarities[i]
-
-    print "Accuracy: ", accuracy
-    print "Average similarity: ", average_sim
-
-
-
-
-
-
-
-
-
+    print "alpha - accuracy - average similarity"
+    for j, alpha in enumerate(alphas):
+        best = "*" if best_index == j else ""
+        print alpha, accuracies[j], average_sims[j], best
