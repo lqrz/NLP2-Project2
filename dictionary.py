@@ -25,7 +25,8 @@ def get_translations_glosbe(word, max_transl=None):
     return translations[:max_transl]
 
 def get_dict_yandex(word):
-    r = requests.get(URL_yandex % urllib.quote(word))
+    # r = requests.get(URL_yandex % urllib.quote(word))
+    r = requests.get(URL_trans_yandex % urllib.quote(word))
     data = json.loads(r.text)
 
     translations = []
