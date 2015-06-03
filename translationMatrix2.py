@@ -4,6 +4,7 @@ import gensim
 import numpy as np
 import pickle
 from sklearn.linear_model import Ridge
+import sys
 
 
 def get_dict_samples(dict_file):
@@ -127,16 +128,20 @@ def get_train_test_sets(dict_file, n_translations, n_train_samples, n_test_sampl
 if __name__ == '__main__':
 
     # ------------- Begin params -------------#
-    matrix_file = "models/lowercase/800_200_tm.p"
+    #matrix_file = "models/lowercase/800_200_tm.p"
     n_train_samples = 5000  # Number of words to train translation matrix.
     n_translations = 1 # (max) number of translation variants per word (default=1)
 
-    dict_file = "models/lowercase/top10ken_trans_yandex.txt"
+    #dict_file = "models/lowercase/top10ken_trans_yandex.txt"
+    dict_file = sys.argv[1]
 
     alphas = [0.1, 0.2,  0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]  # linear regression solver regularization param
 
-    modelPathEn = 'models/lowercase/mono_800_en.bin'
-    modelPathDe = 'models/lowercase/mono_200_de.bin'
+    #modelPathEn = 'models/truecase/mono_200_en.bin'
+    #modelPathDe = 'models/truecase/mono_200_de.bin'
+
+    modelPathEn = sys.argv[2]
+    modelPathDe = sys.argv[3]
 
     # Evaluation
     n_test_samples = 100 # number of test samples (subsequent words not used in training)
@@ -186,7 +191,7 @@ if __name__ == '__main__':
 
         print "Saving matrix"
         # Store translation matrix
-        pickle.dump(translation_matrix,open(matrix_file,'w'))
+        #pickle.dump(translation_matrix,open(matrix_file,'w'))
 
         print "Evaluating"
         # evaluation
@@ -199,6 +204,8 @@ if __name__ == '__main__':
             print "Cand: ", predicted_translations[i]
             print "Sim: ", similarities[i]
 
+        print "----------"
+        print "Alpha: ", alpha
         print "Accuracy: ", accuracy
         print "Average similarity: ", average_sim
 
