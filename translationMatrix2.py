@@ -67,7 +67,7 @@ def calculate_acc_avgsim(similarities, ranks):
     total = len(ranks)
     c = Counter(ranks)
 
-    counts = [float(c.get(r, 0)) for r in range(1, np.max(c.keys()))]
+    counts = [float(c.get(r, 0)) for r in range(1, 1+np.max(c.keys()))]
     accuracies = np.cumsum(counts) / float(total)
 
     average_sim = np.mean([s for s in similarities if s > 0])
