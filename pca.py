@@ -18,45 +18,20 @@ from nltk.corpus import PlaintextCorpusReader
 from dictionary import get_translation_yandex
 
 
-def getPCASamples(fname):
-    #240 each class
-    m = np.zeros([480,4])
-    
-    features = dict()
-    
-    f = open(constants.PREPROCESSFEATURESFILENAME,'r')
-    for l in f:
-        l = l.strip()
-        if l=='':
-            continue
-        q1 = l.split('\t')[0]
-        q2 = l.split('\t')[1]
-        f1 = l.split('\t')[2]
-        f2 = l.split('\t')[3]
-        f3 = l.split('\t')[4]
-        f4 = l.split('\t')[5]
-        features[(q1,q2)] = [f1, f2, f3, f4]
-    
-    
-    f = open(constants.FOLDEDDATA_DIRECTORY+fname,'r')
-    i=0
-    for l in f:
-        l = l.strip()
-        if l==' ':
-            continue
-        q1 = l.split('\t')[1]
-        q2 = l.split('\t')[2]
-        m[i,:] = np.array(features[(q1,q2)])
-        i += 1
-    
-    return m
-
-
 if __name__ == '__main__':
     n_components = 3
 
     modelPathEn = 'models/mono_800_en.bin'
     modelPathDe = 'models/mono_200_de.bin'
+
+    path = 'data/en/norm/lqrz.en'
+
+    if sys.argv[1]:
+        modelPathEn = sys.argv[1]
+    if sys.argv[2]:
+        modelPathDe = sys.argv[2]
+    if sys.argv[3]:
+        path = sys.arg[3]
 
     # Load word2vec trained models
     gensimModelEn = loadModel(modelPathEn)
@@ -67,7 +42,6 @@ if __name__ == '__main__':
 
     weights = pickle.load(open('lrweights.p','r'))
 
-    path = 'data/en/norm/lqrz.en'
 
     idx = path.rfind('/') + 1
     folder = path[0:idx]
