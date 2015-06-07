@@ -205,7 +205,7 @@ if __name__ == '__main__':
     # print test results
     # comment out if not desired
     for i, (s, t) in enumerate(test_samples):
-        print "Test word: ", s
+        print "Test word: ", s.encode("utf-8")
         print "Gold: ", t
         print "Cand: ", predicted_translations[i]
         print "Sim: ", similarities[i]
