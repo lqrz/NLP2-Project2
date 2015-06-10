@@ -5,16 +5,14 @@ import pickle
 import gensim
 import numpy as np
 import codecs
+from os import walk
+import re
+import gzip
+from nltk.corpus import PlaintextCorpusReader
 
 if __name__ == '__main__':
 
     nCandidates = 10 # number of possible translations to retrieve from embedding space
-
-    outputPhraseTablePath = 'secondPhraseTable'
-    outputLogFilePath = 'secondTable.log'
-
-    foutPhraseTable = codecs.open(outputPhraseTablePath, "w", "utf-8")
-    foutLog = codecs.open(outputLogFilePath, "w", "utf-8")
 
     modelsPath = '/home/wechsler/NLP2-Project2/models/truecase/'
     if len(sys.argv) > 1:
@@ -22,7 +20,13 @@ if __name__ == '__main__':
 
     dimensions = [200,400,800]
 
-    oovFilenames = ['oovs24.5998608212.p'] # TODO: Add pickle filenames
+    # oovFilenames = ['oovs24.5998608212.p'] # TODO: Add pickle filenames
+
+    oovFilenames = []
+
+    for (_, _, filenames) in walk('./'):
+        files = [re.match(r'^(wordsToReplace).*',fn).group() for fn in filenames if re.match(r'^(wordsToReplace).*',fn)]
+        oovFilenames.extend(files)
 
     directPath = modelsPath + 'de-en/yandex/'
     inversePath = modelsPath + 'en-de/'
@@ -55,7 +59,18 @@ if __name__ == '__main__':
 
     # load OOVs
     for f in oovFilenames:
-        oovs = pickle.load(open(f,'rb'))
+        outputPhraseTablePath = 'secondPhraseTable' + f + '.gz'
+        outputLogFilePath = 'secondTable' + f + '.log'
+
+        # foutPhraseTable = codecs.open(outputPhraseTablePath, "w", "utf-8")
+        foutPhraseTable = gzip.open(outputPhraseTablePath, "wb")
+        foutLog = codecs.open(outputLogFilePath, "w", "utf-8")
+
+        # oovs = pickle.load(open(f,'rb'))
+
+        corpus = PlaintextCorpusReader('./', f)
+        oovs = corpus.words()
+
         totalOOV = len(oovs)
         foutLog.write('Processing file ' + f + '\n')
         foutLog.write('Total number of unknown words: ' + str(totalOOV) + '\n')
@@ -84,10 +99,11 @@ if __name__ == '__main__':
                         inverseProb = 0
 
                 for wCand, wCos in candidates:
+                    convOOV = '##' + oov
                     sep = '|||'
                     directProb = str(wCos / float(totalProb))
                     inverseProb = str(inverseProb)
-                    line = ' '.join([oov,sep,wCand,sep,inverseProb, inverseProb,directProb,directProb,sep,sep,sep,sep,sep])
+                    line = ' '.join([convOOV,sep,wCand,sep,inverseProb, inverseProb,directProb,directProb,sep,sep,sep,sep,sep,sep,sep,'\n'])
                     foutPhraseTable.write(line)
 
 
@@ -96,11 +112,13 @@ if __name__ == '__main__':
                 noTranslationWords.add(oov)
                 continue
 
-        foutLog('Total words translated: ' + str(totalOOV - len(noTranslationWords)) + '\n')
+        foutLog.write('Total words translated: ' + str(totalOOV - len(noTranslationWords)) + '\n')
         for w in set(oovs) - set(noTranslationWords):
-            foutLog('Translated word: ' + w + '\n')
+            foutLog.write('Translated word: ' + w + '\n')
 
         for w in noTranslationWords:
-            foutLog('Untranslated word: ' + w + '\n')
+            foutLog.write('Untranslated word: ' + w + '\n')
+
+        foutLog.close()
         # save second table
         foutPhraseTable.close()
