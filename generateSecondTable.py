@@ -13,20 +13,27 @@ from nltk.corpus import PlaintextCorpusReader
 if __name__ == '__main__':
 
     nCandidates = 10 # number of possible translations to retrieve from embedding space
+    processAll = False
 
     modelsPath = '/home/wechsler/NLP2-Project2/models/truecase/'
-    if len(sys.argv) > 1:
+    if len(sys.argv) == 4:
         modelsPath = sys.argv[1]
+        processAll = sys.argv[2]
+        oovFilename = sys.argv[3]
+    elif len(sys.argv) > 1 :
+        print 'Error! missing parameters'
 
     dimensions = [200,400,800]
 
     # oovFilenames = ['oovs24.5998608212.p'] # TODO: Add pickle filenames
 
     oovFilenames = []
-
-    for (_, _, filenames) in walk('./'):
-        files = [re.match(r'^(wordsToReplace).*',fn).group() for fn in filenames if re.match(r'^(wordsToReplace).*',fn)]
-        oovFilenames.extend(files)
+    if processAll:
+        for (_, _, filenames) in walk('./'):
+            files = [re.match(r'^(wordsToReplace).*',fn).group() for fn in filenames if re.match(r'^(wordsToReplace).*',fn)]
+            oovFilenames.extend(files)
+    elif not processAll:
+        oovFilenames.append(oovFilename)
 
     directPath = modelsPath + 'de-en/yandex/'
     inversePath = modelsPath + 'en-de/'
