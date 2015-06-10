@@ -35,7 +35,9 @@ if __name__ == '__main__':
 	# test_corpus = PlaintextCorpusReader('corpus/testing/','test.true.de')
 
 	oovs = len(set(fd.keys()) - l)
-	oovs_perc = oovs / len(fd.keys())
+	oovs_perc = float(oovs) / len(fd.keys())
 
 	print 'oovs: ', oovs, oovs_perc, '\n'
 	print 'Total words in set: ', len(fd.keys())
+	
+	pickle.dump(oovs,open('oovs'+str(oovs_perc),'wb'))
