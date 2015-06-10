@@ -10,6 +10,7 @@ for p in $(ls | grep '^wordsToReplace2')
 		# STEP 0: MAKE REPLACEMENTS IN CORPUS
 		if [ $1 -eq  0 ]
 		then
+			mkdir -p 20
 			cp $p 20/
 			cd 20/
 			NEWCORPUS="test.true.20.de"
