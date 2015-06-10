@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     testCorpusPath = 'data/test.true.de'
     if len(sys.argv) == 2:
-        tesCorpusPath = sys.argv[1]
+	testCorpusPath = sys.argv[1]
 
     idx = testCorpusPath.rfind('/') + 1
     folder = testCorpusPath[0:idx]
