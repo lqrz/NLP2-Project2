@@ -2,7 +2,7 @@ __author__ = 'lqrz'
 import sys
 from itertools import combinations
 import pickle
-import gensim
+from gensim import gensim
 import numpy as np
 import codecs
 from os import walk
@@ -16,9 +16,14 @@ if __name__ == '__main__':
     processAll = False
 
     modelsPath = '/home/wechsler/NLP2-Project2/models/truecase/'
-    if len(sys.argv) == 3:
+    directPath = modelsPath + 'de-en/yandex/'
+    inversePath = modelsPath + 'en-de/'
+
+    if len(sys.argv) == 5:
         modelsPath = sys.argv[1]
         oovFilename = sys.argv[2]
+	directPath = sys.argv[3]
+	inversePath = sys.argv[4]
     elif len(sys.argv) > 1 :
         print 'Error! missing parameters'
 
@@ -36,8 +41,6 @@ if __name__ == '__main__':
         print 'Processing file: ' + oovFilename + '\n'
         oovFilenames.append(oovFilename)
 
-    directPath = modelsPath + 'de-en/yandex/'
-    inversePath = modelsPath + 'en-de/'
 
     tmFilenames = set()
     modelFilenames = set()
@@ -52,10 +55,10 @@ if __name__ == '__main__':
         tmFilenames.add(('mono_'+de+'_de.bin', 'mono_'+en+'_en.bin', 'tm_'+de+'_'+en+'.p', 'tm_'+en+'_'+de+'.p'))
 
 
-    tmFilenames = [('mono_800_de.bin', 'mono_200_en.bin', 'tm_800_200.p', 'tm_200_800.p')]
-    directPath = 'models/'
-    inversePath = 'models/'
-    modelsPath = 'models/'
+    tmFilenames = [('mono_800_de.bin', 'mono_400_en.bin', 'tm_800_400.p', 'tm_400_800.p')]
+#    directPath = 'models/'
+#    inversePath = 'models/'
+#    modelsPath = 'models/'
 
     for i,t in enumerate(tmFilenames):
         deModel = gensim.models.Word2Vec.load_word2vec_format(modelsPath+t[0],binary=True)
@@ -111,7 +114,7 @@ if __name__ == '__main__':
                     sep = '|||'
                     directProb = str(wCos / float(totalProb))
                     inverseProb = str(inverseProb)
-                    line = ' '.join([convOOV,sep,wCand,sep,inverseProb, inverseProb,directProb,directProb,sep,sep,sep,sep,sep,sep,sep,'\n'])
+                    line = ' '.join([convOOV,sep,wCand,sep,inverseProb, inverseProb,directProb,directProb,sep,sep,sep,sep,'\n'])
                     foutPhraseTable.write(line)
 
 
