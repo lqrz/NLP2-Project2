@@ -16,10 +16,9 @@ if __name__ == '__main__':
     processAll = False
 
     modelsPath = '/home/wechsler/NLP2-Project2/models/truecase/'
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 3:
         modelsPath = sys.argv[1]
-        processAll = sys.argv[2]
-        oovFilename = sys.argv[3]
+        oovFilename = sys.argv[2]
     elif len(sys.argv) > 1 :
         print 'Error! missing parameters'
 
@@ -28,11 +27,13 @@ if __name__ == '__main__':
     # oovFilenames = ['oovs24.5998608212.p'] # TODO: Add pickle filenames
 
     oovFilenames = []
-    if processAll:
+    if oovFilename == 'False':
+        print 'Processing all wordsToReplace files in current directory. \n'
         for (_, _, filenames) in walk('./'):
             files = [re.match(r'^(wordsToReplace).*',fn).group() for fn in filenames if re.match(r'^(wordsToReplace).*',fn)]
             oovFilenames.extend(files)
-    elif not processAll:
+    else:
+        print 'Processing file: ' + oovFilename + '\n'
         oovFilenames.append(oovFilename)
 
     directPath = modelsPath + 'de-en/yandex/'
