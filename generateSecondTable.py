@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
         # oovs = pickle.load(open(f,'rb'))
 
-        corpus = PlaintextCorpusReader('./', f, "utf-8")
+        corpus = PlaintextCorpusReader('./', f, encoding="utf-8")
         oovs = corpus.words()
 
         totalOOV = len(oovs)
@@ -113,9 +113,10 @@ if __name__ == '__main__':
                 for wCand, wCos in candidates:
                     convOOV = '##' + oov
                     sep = '|||'
+                    alig = '0-0'
                     directProb = str(wCos / float(totalProb))
                     inverseProb = str(inverseProb)
-                    line = ' '.join([convOOV,sep,wCand,sep,inverseProb, inverseProb,directProb,directProb,sep,sep,sep,sep,'\n'])
+                    line = ' '.join([convOOV,sep,wCand,sep,inverseProb, inverseProb,directProb,directProb,sep,alig,sep,sep,sep,'\n'])
                     foutPhraseTable.write(line)
 
 
