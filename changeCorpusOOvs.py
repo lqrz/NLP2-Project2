@@ -8,11 +8,13 @@ import codecs
 
 if __name__ == '__main__':
 
-    nWords = 100 # Consider n most frequent words to eliminate
+    # nWords = 100 # Consider n most frequent words to eliminate
+    minFreq = 10
+    maxFreq = 50
 
     testCorpusPath = 'data/test.true.de'
     if len(sys.argv) == 2:
-	testCorpusPath = sys.argv[1]
+        testCorpusPath = sys.argv[1]
 
     idx = testCorpusPath.rfind('/') + 1
     folder = testCorpusPath[0:idx]
@@ -26,14 +28,16 @@ if __name__ == '__main__':
 
     totalLen = sum(fd.values())
 
-    mostFrequentWords = sorted(fd.items(), key=lambda x: x[1], reverse=True)[:nWords]
+    mostFrequentWords = sorted(fd.items(), key=lambda x: x[1], reverse=True)
+
+    filteredWords = [(w,f) for w,f in mostFrequentWords if f>=minFreq and f<=maxFreq ]
 
     percs = [20,50,70]
     tot = 0
     candidates = set()
     for p in percs:
         while tot < p:
-            candidate = random.choice(mostFrequentWords)
+            candidate = random.choice(filteredWords)
             tot += candidate[1]*100 / float(totalLen)
             candidates.add(candidate[0]) # add word to remove from phrase table or corpus
         fout = codecs.open('wordsToReplace'+str(tot)+'.txt','w','utf-8')
