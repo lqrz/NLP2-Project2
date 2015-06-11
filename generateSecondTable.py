@@ -70,16 +70,17 @@ if __name__ == '__main__':
 
     # load OOVs
     for f in oovFilenames:
-        outputPhraseTablePath = 'secondPhraseTable' + f + '.gz'
+#        outputPhraseTablePath = 'secondPhraseTable' + f + '.gz'
+        outputPhraseTablePath = 'secondPhraseTable' + f
         outputLogFilePath = 'secondTable' + f + '.log'
 
-        # foutPhraseTable = codecs.open(outputPhraseTablePath, "w", "utf-8")
-        foutPhraseTable = gzip.open(outputPhraseTablePath, "wb")
+        foutPhraseTable = codecs.open(outputPhraseTablePath, "w", "utf-8")
+#        foutPhraseTable = gzip.open(outputPhraseTablePath, "wb")
         foutLog = codecs.open(outputLogFilePath, "w", "utf-8")
 
         # oovs = pickle.load(open(f,'rb'))
 
-        corpus = PlaintextCorpusReader('./', f)
+        corpus = PlaintextCorpusReader('./', f, "utf-8")
         oovs = corpus.words()
 
         totalOOV = len(oovs)
