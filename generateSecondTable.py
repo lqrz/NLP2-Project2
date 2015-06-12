@@ -13,7 +13,8 @@ from nltk.corpus import PlaintextCorpusReader
 
 if __name__ == '__main__':
 
-    nCandidates = 10 # number of possible translations to retrieve from embedding space
+    nDirectCandidates = 10 # number of possible translations to retrieve from embedding space
+    nInverseCandidates = 250
     processAll = False
 
     modelsPath = '/home/wechsler/NLP2-Project2/models/truecase/'
@@ -97,7 +98,7 @@ if __name__ == '__main__':
                 # get representations
                 deRep = deModel[oov]
                 calculatedRep = np.dot(directMatrix, deRep)
-                candidates = enModel.most_similar(positive=[calculatedRep], topn=nCandidates)
+                candidates = enModel.most_similar(positive=[calculatedRep], topn=nDirectCandidates)
 
                 totalProb = 0
                 normalizedCandidates = set()
@@ -106,7 +107,7 @@ if __name__ == '__main__':
                     try:
                         inverseRep = enModelInverse[wCand]
                         inverseCalculatedRep = calculatedRep = np.dot(inverseMatrix, inverseRep)
-                        inverseCandidates = deModelInverse.most_similar(positive=[inverseCalculatedRep], topn=nCandidates)
+                        inverseCandidates = deModelInverse.most_similar(positive=[inverseCalculatedRep], topn=nInverseCandidates)
                         tot = 0
                         if any(oov in t for t in inverseCandidates):
                             idx = next(i for i, (trans, _) in enumerate(inverseCandidates) if trans == oov)
