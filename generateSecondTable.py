@@ -87,7 +87,7 @@ if __name__ == '__main__':
         # oovs = pickle.load(open(f,'rb'))
 
         corpus = PlaintextCorpusReader('./', f, encoding="utf-8")
-        oovs = corpus.words()
+        oovs = set(corpus.words())
 
         totalOOV = len(oovs)
         foutLog.write('Processing file ' + f + '\n')
