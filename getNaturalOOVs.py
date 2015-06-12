@@ -23,11 +23,11 @@ def getTestCorpusWords(path):
     folder = testCorpusPath[0:idx]
     filename = testCorpusPath[idx:]
 
-    testCorpus = PlaintextCorpusReader(folder, filename)
+    testCorpus = PlaintextCorpusReader(folder, filename, encoding='utf-8')
 
     depunct = [w for w in testCorpus.words() if w.isalpha()]
 
-    return set (depunct)
+    return set(depunct)
 
 
 if __name__ == '__main__':
