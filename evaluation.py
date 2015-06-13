@@ -5,12 +5,14 @@ from CorpusReader import CorpusReader
 from nltk.corpus import PlaintextCorpusReader
 from nltk import FreqDist
 import sys
+import codecs
 
 def getEntries(corpus):
     tableEntries = set()
 
-    for sentence in corpus.get_raw_corpus():
-        tableEntries.add(sentence.split('|||')[0].strip())
+    for line in corpus.get_raw_corpus():
+        entry = line.decode('utf-8').split('|||')[0].strip()
+        tableEntries.add(entry)
 
     return tableEntries
 
@@ -19,7 +21,7 @@ def getTestCorpus(testCorpusPath):
     idx = testCorpusPath.rfind('/') + 1
     folder = testCorpusPath[0:idx]
     filename = testCorpusPath[idx:]
-    testCorpus = PlaintextCorpusReader(folder, filename)
+    testCorpus = PlaintextCorpusReader(folder, filename, encoding='utf-8')
 
     return [w for w in testCorpus.words() if w.isalpha()]
 
@@ -45,7 +47,7 @@ if __name__ == '__main__':
     phraseTablePath1 = None
     phraseTablePath2 = None
     testCorpusPath = None
-    pickled = None
+    pickled = 'False'
     #----------
 
     initializeDebug()
@@ -56,33 +58,42 @@ if __name__ == '__main__':
         testCorpusPath = sys.argv[3] # test corpus filename
         pickled = sys.argv[4] # was it previously ran and want to load pickles?
     elif len(sys.argv) > 1:
-        print 'Usage: 1)Phrase table path, 2) Second phrase table, 3) Test corpus folder, 3) Pickled?'
+        print 'Error in params. Usage: 1)Phrase table path, 2) Second phrase table, 3) Test corpus folder, 4) Pickled?'
+        exit()
 
-    if pickled=='False':
+    if pickled == 'False':
+
+        print 'Getting phrase table 1 entries'
         corpusTable1 = CorpusReader(phraseTablePath1)
-        corpusTable2 = CorpusReader(phraseTablePath2)
-
         table1Entries = getEntries(corpusTable1)
+
+        print 'Getting phrase table 2 entries'
+        corpusTable2 = CorpusReader(phraseTablePath2)
         table2Entries = getEntries(corpusTable2)
 
-        pickle.dump(table1Entries, open(phraseTablePicklePath, 'wb'))
-        pickle.dump(table2Entries, open(secondTablePicklePath, 'wb'))
-
+        print 'Getting test corpus'
         depunctTestCorpus = getTestCorpus(testCorpusPath)
 
+        print 'Constructing test corpus freq dict'
         fd = FreqDist(depunctTestCorpus)
 
+        print 'Pickling data'
+        pickle.dump(table1Entries, open(phraseTablePicklePath, 'wb'))
+        pickle.dump(table2Entries, open(secondTablePicklePath, 'wb'))
         pickle.dump(fd, open(testCorpusFDPicklePath, 'wb'))
 
     else:
-        print 'Getting pickled table set'
+        print 'Getting pickled phrase table 1 entries'
         table1Entries = pickle.load(open(phraseTablePicklePath, 'rb'))
+
+        print 'Getting pickled phrase table 2 entries'
         table2Entries = pickle.load(open(secondTablePicklePath, 'rb'))
+
+        print 'Getting pickles test corpus freq dict'
         fd = pickle.load(open(testCorpusFDPicklePath, 'rb'))
 
-    print 'Getting test corpus'
-    # test_corpus = PlaintextCorpusReader('corpus/testing/','test.true.de')
-
+    print 'Computing stats'
+    
     corpusLen = sum(fd.values())
 
     allEntries = table1Entries.union(table2Entries)
@@ -115,10 +126,10 @@ if __name__ == '__main__':
     print 'Nr of unknown word types using original table and second table: ', table2OOVNr, table2OOVsPerc, '\n'
     print 'Total word types in set: ', totalWordTypes
 
-    print 'Nr of unknown tokens using original table: ',table1OOVTokenNr,  table1OOVTokenPerc,'\n'
-    print 'Nr of unknown tokens using original table and second table: ',table2OOVTokenNr,  table2OOVTokenPerc,'\n'
+    print 'Nr of unknown tokens using original table: ', table1OOVTokenNr,  table1OOVTokenPerc, '\n'
+    print 'Nr of unknown tokens using original table and second table: ', table2OOVTokenNr,  table2OOVTokenPerc, '\n'
     print 'Total tokens in set: ', corpusLen
 
     # Pickle OOVs
-    pickle.dump(table1OOVs,open('table1OOVs.p', 'wb'))
-    pickle.dump(table2OOVs,open('table1OOVs.p', 'wb'))
+    pickle.dump(table1OOVs, open('table1OOVs.p', 'wb'))
+    pickle.dump(table2OOVs, open('table1OOVs.p', 'wb'))
