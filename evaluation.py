@@ -6,6 +6,8 @@ from nltk.corpus import PlaintextCorpusReader
 from nltk import FreqDist
 import sys
 import codecs
+from nltk.tokenize import RegexpTokenizer
+import re
 
 def getEntries(corpus):
     tableEntries = set()
@@ -21,9 +23,9 @@ def getTestCorpus(testCorpusPath):
     idx = testCorpusPath.rfind('/') + 1
     folder = testCorpusPath[0:idx]
     filename = testCorpusPath[idx:]
-    testCorpus = PlaintextCorpusReader(folder, filename, encoding='utf-8')
+    testCorpus = PlaintextCorpusReader(folder, filename, encoding='utf-8', word_tokenizer=RegexpTokenizer(r'##\w+|\w+|[^\w\s]+'))
 
-    return [w for w in testCorpus.words() if w.isalpha()]
+    return [w for w in testCorpus.words() if w.isalpha() or re.match(r'^##[a-zA-Z0-9]+$', w)]
 
 def initializeDebug():
     global phraseTablePath1
@@ -32,8 +34,8 @@ def initializeDebug():
     global pickled
 
     phraseTablePath1 = 'table1.gz' # original phrase table
-    phraseTablePath2 = 'table2.gz' # second phrase table
-    testCorpusPath = 'data/test.true.de' # test corpus filename
+    phraseTablePath2 = 'phrase-table-20.gz' # second phrase table
+    testCorpusPath = 'data/test.true.20.de' # test corpus filename
     pickled = 'False' # was it previously ran and want to load pickles?
 
     return True
@@ -93,8 +95,13 @@ if __name__ == '__main__':
         fd = pickle.load(open(testCorpusFDPicklePath, 'rb'))
 
     print 'Computing stats'
-    
+
     corpusLen = sum(fd.values())
+
+    # #TODO: test.delete.
+    # c2 = PlaintextCorpusReader('data','test.true.de',encoding='utf-8')
+    # fd2 = FreqDist([w for w in c2.words() if w.isalpha()])
+    # set(fd.keys()) - set(fd2.keys())
 
     allEntries = table1Entries.union(table2Entries)
 
@@ -132,4 +139,4 @@ if __name__ == '__main__':
 
     # Pickle OOVs
     pickle.dump(table1OOVs, open('table1OOVs.p', 'wb'))
-    pickle.dump(table2OOVs, open('table1OOVs.p', 'wb'))
+    pickle.dump(table2OOVs, open('table2OOVs.p', 'wb'))
