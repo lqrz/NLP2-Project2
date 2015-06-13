@@ -5,7 +5,7 @@ from nltk.corpus import PlaintextCorpusReader
 from nltk import FreqDist
 import random
 import codecs
-# import gensim
+#import gensim
 from gensim import gensim
 
 if __name__ == '__main__':
