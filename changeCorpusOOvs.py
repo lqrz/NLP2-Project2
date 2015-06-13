@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     # nWords = 100 # Consider n most frequent words to eliminate
     minFreq = 10
-    maxFreq = 50
+    maxFreq = 150
 
     testCorpusPath = 'data/test.true.de'
     naturalOOVsFilename = 'naturalOOVs.txt'
@@ -46,34 +46,44 @@ if __name__ == '__main__':
 
     mostFrequentWords = sorted(fd.items(), key=lambda x: x[1], reverse=True)
 
-    filteredWords = [(w,f) for w,f in mostFrequentWords if f>=minFreq and f<=maxFreq ]
-
     # base = sum([f for w,f in fd.items() if w in naturalOOVs]) / float(totalLen)
     base = sum([fd[w] for w in naturalOOVs]) / float(totalLen) # OOV percentage wrt tokens
 
-    percs = [20, 50, 70]
+    percs = [(0.2, 10, 50), (0.3, 10, 130), (0.5, 10, 430)]
 
-    for p in percs:
+    for p, fmin, fmax in percs:
         print 'Processing perc: ', p
-        tot = base
+        tot = 0
         candidates = set()
-        while tot < p:
-            candidate = random.choice(filteredWords)
+        universe = [(w,f) for w,f in mostFrequentWords if f>=fmin and f<=fmax ]
+        print 'Length of set of candidates: ', len(universe)
+        while (tot+base) < p:
+            if len(universe) == 0:
+                print 'Error not enough words.'
+                exit()
+
+            candidate = random.choice(universe)
+            universe.remove(candidate)
+
+            # check we are adding a new word to the set
+            if candidate[0] in candidates:
+                continue
 
             # check we are adding a new unknown to the natural set
             if candidate[0] in naturalOOVs:
                 continue
 
-            # check we can get a translation for it
-            try:
-                model[candidate[0]]
-            except KeyError:
-                continue
 
-            tot += candidate[1]*100 / float(totalLen)
+            # check we can get a translation for it
+            # try:
+            #     model[candidate[0]]
+            # except KeyError:
+            #     continue
+
+            tot += candidate[1] / float(totalLen)
             candidates.add(candidate[0]) # add word to remove from phrase table or corpus
 
-        fout = codecs.open('wordsToReplace'+str(tot)+'.txt', 'w', 'utf-8')
+        fout = codecs.open('wordsToReplace'+str(int((tot+base)*100))+'.txt', 'w', 'utf-8')
 
         # write naturalOOVs
         for w in naturalOOVs:
