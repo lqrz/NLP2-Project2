@@ -11,7 +11,7 @@ if __name__ == "__main__":
         testCorpusPath = sys.argv[1]
         foutFilename = sys.argv[2]
     elif len(sys.argv) > 1:
-        print 'Error in params: 1) Test corpus path'
+        print 'Error in params: 1) Test corpus path 2) Output filename'
         exit()
 
     idx = testCorpusPath.rfind('/') + 1
