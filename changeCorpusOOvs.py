@@ -5,7 +5,8 @@ from nltk.corpus import PlaintextCorpusReader
 from nltk import FreqDist
 import random
 import codecs
-import gensim
+# import gensim
+from gensim import gensim
 
 if __name__ == '__main__':
 
@@ -45,11 +46,11 @@ if __name__ == '__main__':
     # base = sum([f for w,f in fd.items() if w in naturalOOVs]) / float(totalLen)
     base = sum([fd[w] for w in naturalOOVs]) / float(totalLen) # OOV percentage wrt tokens
 
-    percs = [int(x) - int(base*100) for x in [20, 50, 70]]
+    percs = [20, 50, 70]
 
     candidates = set()
     for p in percs:
-        tot = 0
+        tot = base
         while tot < p:
             candidate = random.choice(filteredWords)
 
@@ -66,6 +67,12 @@ if __name__ == '__main__':
             tot += candidate[1]*100 / float(totalLen)
             candidates.add(candidate[0]) # add word to remove from phrase table or corpus
         fout = codecs.open('wordsToReplace'+str(tot)+'.txt','w','utf-8')
+
+        # write naturalOOVs
+        for w in naturalOOVs:
+            fout.write(w+'\n')
+
+        # write artificialOOVs
         for w in candidates:
             fout.write(w+'\n')
         fout.close()
