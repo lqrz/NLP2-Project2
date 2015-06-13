@@ -4,19 +4,8 @@ from CorpusReader import CorpusReader
 import sys
 from nltk.corpus import PlaintextCorpusReader
 import codecs
+from evaluation import getEntries
 
-
-def getPhraseTableEntries(path):
-    tableCorpus = CorpusReader(path)
-    tableLines = tableCorpus.get_raw_corpus()
-
-    tableEntries = set()
-
-    sep = '|||'
-    for line in tableLines:
-        tableEntries.add(line.split(sep)[0].strip())
-
-    return tableEntries
 
 def getTestCorpusWords(path):
     idx = testCorpusPath.rfind('/') + 1
@@ -40,8 +29,10 @@ if __name__ == '__main__':
         testCorpusPath = sys.argv[2]
     elif len(sys.argv) > 1:
         print 'Error in params: 1) Phrase table path 2) Test corpus path'
+        exit()
 
-    tableEntries = getPhraseTableEntries(tablePath)
+    tableCorpus = CorpusReader(tablePath)
+    tableEntries = getEntries(tableCorpus)
     testCorpusWords = getTestCorpusWords(testCorpusPath)
 
     OOVs = testCorpusWords - tableEntries
