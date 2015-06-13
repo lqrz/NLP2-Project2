@@ -21,14 +21,19 @@ if __name__ == '__main__':
         testCorpusPath = sys.argv[1]
         naturalOOVsFilename = sys.argv[2]
         modelPath = sys.argv[3]
+    elif len(sys.argv) > 1:
+        print 'Error in params: 1) Test corpus path 2) Natural OOVs filename 3) Word2vec model path'
+        exit()
 
     idx = testCorpusPath.rfind('/') + 1
     folder = testCorpusPath[0:idx]
     filename = testCorpusPath[idx:]
 
+    print 'Retrieving file entries'
     corpus = PlaintextCorpusReader(folder, filename, encoding='utf-8')
     naturalCorpus = PlaintextCorpusReader('./',naturalOOVsFilename, encoding='utf-8')
 
+    print 'Retrieving word2vec model'
     model = gensim.models.Word2Vec.load_word2vec_format(modelPath,binary=True)
 
     naturalOOVs = set(naturalCorpus.words())
@@ -48,9 +53,10 @@ if __name__ == '__main__':
 
     percs = [20, 50, 70]
 
-    candidates = set()
     for p in percs:
+        print 'Processing perc: ', p
         tot = base
+        candidates = set()
         while tot < p:
             candidate = random.choice(filteredWords)
 
@@ -66,7 +72,8 @@ if __name__ == '__main__':
 
             tot += candidate[1]*100 / float(totalLen)
             candidates.add(candidate[0]) # add word to remove from phrase table or corpus
-        fout = codecs.open('wordsToReplace'+str(tot)+'.txt','w','utf-8')
+
+        fout = codecs.open('wordsToReplace'+str(tot)+'.txt', 'w', 'utf-8')
 
         # write naturalOOVs
         for w in naturalOOVs:
@@ -75,4 +82,5 @@ if __name__ == '__main__':
         # write artificialOOVs
         for w in candidates:
             fout.write(w+'\n')
+
         fout.close()
