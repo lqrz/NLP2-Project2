@@ -43,12 +43,13 @@ if __name__ == '__main__':
     filteredWords = [(w,f) for w,f in mostFrequentWords if f>=minFreq and f<=maxFreq ]
 
     # base = sum([f for w,f in fd.items() if w in naturalOOVs]) / float(totalLen)
-    base = sum([fd[w] for w in naturalOOVs]) / float(totalLen)
+    base = sum([fd[w] for w in naturalOOVs]) / float(totalLen) # OOV percentage wrt tokens
 
     percs = [int(x) - int(base*100) for x in [20, 50, 70]]
-    tot = 0
+
     candidates = set()
     for p in percs:
+        tot = 0
         while tot < p:
             candidate = random.choice(filteredWords)
 
