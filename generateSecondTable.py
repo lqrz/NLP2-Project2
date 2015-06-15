@@ -106,7 +106,7 @@ if __name__ == '__main__':
                     totalProb += wCos
                     try:
                         inverseRep = enModelInverse[wCand]
-                        inverseCalculatedRep = calculatedRep = np.dot(inverseMatrix, inverseRep)
+                        inverseCalculatedRep = np.dot(inverseMatrix, inverseRep)
                         inverseCandidates = deModelInverse.most_similar(positive=[inverseCalculatedRep], topn=nInverseCandidates)
                         tot = 0
                         if any(oov in t for t in inverseCandidates):
