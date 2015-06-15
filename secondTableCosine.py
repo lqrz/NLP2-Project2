@@ -2,8 +2,8 @@ __author__ = 'lqrz'
 import sys
 # from itertools import combinations
 import pickle
-# from gensim import gensim
-import gensim
+from gensim import gensim
+# import gensim
 import numpy as np
 import codecs
 from os import walk
@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     # dimensions = [200,400,800]
 
-    oovFilename = 'wordsToReplace15.txt' # TODO: For debug. Comment.
+    # oovFilename = 'wordsToReplace15.txt' # TODO: For debug. Comment.
 
     oovFilenames = []
     if oovFilename == 'False':
@@ -58,11 +58,11 @@ if __name__ == '__main__':
 
     tmFilenames = [('mono_800_de.bin', 'mono_400_en.bin', 'tm_800_400.p', 'mono_400_de.bin', 'mono_800_en.bin', 'tm_800_400.p')]
 
-    # TODO: this are debug param values. Comment.
-    tmFilenames = [('mono_800_de.bin', 'mono_200_en.bin', 'tm_800_200.p', 'mono_200_de.bin', 'mono_800_en.bin', 'tm_800_200.p')]
-    directPath = 'models/de-en/'
-    inversePath = 'models/en-de/'
-    modelsPath = 'models/'
+    # # TODO: this are debug param values. Comment.
+    # tmFilenames = [('mono_800_de.bin', 'mono_200_en.bin', 'tm_800_200.p', 'mono_200_de.bin', 'mono_800_en.bin', 'tm_800_200.p')]
+    # directPath = 'models/de-en/'
+    # inversePath = 'models/en-de/'
+    # modelsPath = 'models/'
 
     for t in tmFilenames:
         deModel = gensim.models.Word2Vec.load_word2vec_format(modelsPath+t[0],binary=True)
